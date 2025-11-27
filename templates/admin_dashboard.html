@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="dashboard-nav">
+        <div class="nav-brand">
+            <span class="eco-icon">👑</span>
+            <span>Admin Dashboard</span>
+        </div>
+        <div class="nav-user">
+            <span>{{ session.username }}</span>
+            <a href="/logout" class="btn btn-sm">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>System Management</h1>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <h3>{{ users|length }}</h3>
+                    <p>Total Users</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎟️</div>
+                <div class="stat-info">
+                    <h3>{{ offers|length }}</h3>
+                    <p>Total Offers</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3>{{ offers|selectattr('is_redeemed')|list|length }}</h3>
+                    <p>Redeemed Offers</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h2>User Management</h2>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Account Type</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <select onchange="changeAccountType({{ user.id }}, this.value)" 
+                                        class="account-type-select">
+                                    <option value="user" {% if user.account_type == 'user' %}selected{% endif %}>User</option>
+                                    <option value="cafe" {% if user.account_type == 'cafe' %}selected{% endif %}>Cafe</option>
+                                    <option value="admin" {% if user.account_type == 'admin' %}selected{% endif %}>Admin</option>
+                                </select>
+                            </td>
+                            <td>{{ user.created_at.strftime('%d %b %Y') }}</td>
+                            <td class="action-buttons">
+                                <button onclick="resetPassword({{ user.id }})" class="btn btn-sm btn-warning">
+                                    Reset Password
+                                </button>
+                                {% if user.id != session.user_id %}
+                                <button onclick="deleteUser({{ user.id }})" class="btn btn-sm btn-danger">
+                                    Delete
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h2>All Offers</h2>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>User</th>
+                            <th>Offer</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Expires</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for offer in offers %}
+                        <tr>
+                            <td><span class="code">{{ offer.redeem_code }}</span></td>
+                            <td>{{ offer.user.username }}</td>
+                            <td>{{ offer.offer_title }}</td>
+                            <td>
+                                <span class="offer-badge {% if offer.is_redeemed %}badge-success{% else %}badge-warning{% endif %}">
+                                    {% if offer.is_redeemed %}Redeemed{% else %}Active{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ offer.created_at.strftime('%d %b %Y') }}</td>
+                            <td>{{ offer.expires_at.strftime('%d %b %Y') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function changeAccountType(userId, newType) {
+            const formData = new FormData();
+            formData.append('user_id', userId);
+            formData.append('account_type', newType);
+
+            fetch('/admin/change-account-type', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) location.reload();
+            });
+        }
+
+        function resetPassword(userId) {
+            const newPassword = prompt('Enter new password for user:');
+            if (!newPassword) return;
+
+            const formData = new FormData();
+            formData.append('user_id', userId);
+            formData.append('new_password', newPassword);
+
+            fetch('/admin/reset-password', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message));
+        }
+
+        function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user?')) return;
+
+            const formData = new FormData();
+            formData.append('user_id', userId);
+
+            fetch('/admin/delete-user', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
+    

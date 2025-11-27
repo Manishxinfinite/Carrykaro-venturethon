@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Dashboard - CarryKaro</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo/browselogo1.png') }}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 50%, #c3e6cb 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -20%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(40, 167, 69, 0.1) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(3deg); }
+        }
+
+        /* Navigation */
+        .dashboard-nav {
+            background: rgba(248, 249, 250, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        .eco-icon {
+            font-size: 2rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-user span {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            border: 2px solid;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #28a745;
+            border-color: #28a745;
+        }
+
+        .btn-outline:hover {
+            background: #28a745;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-color: #28a745;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #218838, #1ea085);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem 3rem;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+            text-align: center;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.2rem;
+            margin: 0;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            color: #28a745;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .stat-info p {
+            color: #666;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Redeem Section */
+        .redeem-section {
+            margin-bottom: 3rem;
+        }
+
+        .redeem-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .redeem-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #28a745, #20c997, #17a2b8, #20c997, #28a745);
+            background-size: 200% 100%;
+            animation: gradientMove 3s linear infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .redeem-card h2 {
+            color: #28a745;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(248, 249, 250, 0.8);
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+            background: white;
+        }
+
+        .message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.success {
+            background: linear-gradient(135deg, rgba(212, 237, 218, 0.9), rgba(195, 230, 203, 0.9));
+            color: #155724;
+            border-left: 4px solid #28a745;
+            display: block;
+        }
+
+        .message.error {
+            background: linear-gradient(135deg, rgba(248, 215, 218, 0.9), rgba(245, 198, 203, 0.9));
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+            display: block;
+        }
+
+        /* History Section */
+        .history-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .history-section h2 {
+            color: #28a745;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        /* Search Box */
+        .search-box {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(248, 249, 250, 0.8);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .data-table thead {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(40, 167, 69, 0.05);
+        }
+
+        .data-table tbody tr.hidden {
+            display: none;
+        }
+
+        .code {
+            background: linear-gradient(135deg, #e8f5e8, #d4edda);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: #28a745;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .empty-state::before {
+            content: '📋';
+            display: block;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .dashboard-nav {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .nav-brand {
+                font-size: 1.1rem;
+            }
+
+            .eco-icon {
+                font-size: 1.5rem;
+            }
+
+            .nav-user {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .nav-user span {
+                font-size: 0.9rem;
+            }
+
+            .dashboard-container {
+                padding: 0 1rem 2rem;
+                margin: 1rem auto;
+            }
+
+            .dashboard-header {
+                padding: 1.5rem;
+            }
+
+            .dashboard-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .dashboard-header p {
+                font-size: 0.9rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1.2rem;
+            }
+
+            .stat-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+
+            .stat-info h3 {
+                font-size: 1.5rem;
+            }
+
+            .redeem-card,
+            .history-section {
+                padding: 1.5rem;
+            }
+
+            .redeem-card h2,
+            .history-section h2 {
+                font-size: 1.5rem;
+            }
+
+            .code-input {
+                font-size: 1rem;
+                padding: 0.9rem;
+            }
+
+            .data-table {
+                font-size: 0.85rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.7rem 0.5rem;
+            }
+
+            .code {
+                font-size: 0.85rem;
+                padding: 0.3rem 0.6rem;
+            }
+
+            .empty-state {
+                padding: 2rem 1rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-container {
+                padding: 0 0.5rem 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.6rem 0.4rem;
+                font-size: 0.8rem;
+            }
+
+            .data-table th {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Touch-friendly */
+        @media (hover: none) and (pointer: coarse) {
+            .btn,
+            .code-input,
+            .search-input {
+                min-height: 44px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="dashboard-nav">
+        <div class="nav-brand">
+            <span class="eco-icon">☕</span>
+            <span>Elyra Cafe Dashboard</span>
+        </div>
+        <div class="nav-user">
+            <span>👤 {{ current_user.username if current_user else session.username }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>🎟️ Redeem Customer Offers</h1>
+            <p style="margin-top: 0.5rem; opacity: 0.95;">Scan and validate CarryKaro discount codes</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3>{{ redeemed_offers|length }}</h3>
+                    <p>Total Redeemed</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-info">
+                    <h3>{{ this_week_count }}</h3>
+                    <p>This Week</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🌿</div>
+                <div class="stat-info">
+                    <h3>Eco</h3>
+                    <p>Friendly Partner</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Redeem Section -->
+        <div class="redeem-section">
+            <div class="redeem-card">
+                <h2>🔓 Enter Redeem Code</h2>
+                <form id="redeemForm" onsubmit="redeemOffer(event)">
+                    <div class="form-group">
+                        <input type="text" id="redeemCode" name="redeem_code" required 
+                               placeholder="ENTER-CODE-HERE" class="code-input" 
+                               maxlength="50" autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">✓ Redeem Offer</button>
+                </form>
+                <div id="redeemMessage" class="message"></div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="history-section">
+            <h2>📜 Redemption History</h2>
+            
+            <!-- Search Box -->
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" 
+                       placeholder="Search by code, customer, or offer..." 
+                       onkeyup="searchTable()">
+            </div>
+
+            <div class="table-wrapper">
+                <table class="data-table" id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Offer</th>
+                            <th>Customer</th>
+                            <th>Redeemed At</th>
+                            <th>Redeemed By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for offer in redeemed_offers %}
+                        <tr>
+                            <td><span class="code">{{ offer.redeem_code }}</span></td>
+                            <td>{{ offer.offer_title }}</td>
+                            <td>{{ offer.user.username }}</td>
+                            <td>{{ offer.redeemed_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+                            <td>{{ offer.redeemed_by_cafe }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {% if not redeemed_offers %}
+                <div class="empty-state">
+                    <p>No redemptions yet. Start by redeeming your first customer code!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function redeemOffer(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const messageDiv = document.getElementById('redeemMessage');
+            const codeInput = document.getElementById('redeemCode');
+
+            messageDiv.className = 'message';
+            messageDiv.style.display = 'block';
+            messageDiv.style.background = 'linear-gradient(135deg, rgba(255, 243, 205, 0.9), rgba(255, 234, 167, 0.9))';
+            messageDiv.style.color = '#856404';
+            messageDiv.style.borderLeft = '4px solid #ffc107';
+            messageDiv.textContent = '⏳ Processing...';
+
+            fetch("{{ url_for('redeem_offer') }}", {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = '✅ ' + data.message + ' - Refreshing...';
+                    codeInput.value = '';
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = '❌ ' + data.message;
+                    codeInput.focus();
+                }
+            })
+            .catch(err => {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = '❌ Connection error. Please try again.';
+                console.error(err);
+            });
+        }
+
+        function searchTable() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('historyTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName('td');
+                let found = false;
+
+                for (let j = 0; j < cells.length; j++) {
+                    const cell = cells[j];
+                    if (cell) {
+                        const textValue = cell.textContent || cell.innerText;
+                        if (textValue.toUpperCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (found) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            }
+        }
+
+        document.getElementById('redeemCode').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        document.getElementById('redeemCode').addEventListener('focus', function() {
+            const messageDiv = document.getElementById('redeemMessage');
+            messageDiv.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

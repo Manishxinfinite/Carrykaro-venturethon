@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarryKaro - Scan & Win Offers</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo/browselogo1.png') }}">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 50%, #c3e6cb 100%);
+            line-height: 1.6;
+            color: #333;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -20%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(40, 167, 69, 0.1) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -30%;
+            left: -20%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(32, 201, 151, 0.08) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite reverse;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(3deg); }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(248, 249, 250, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .logo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .brand-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .brand-text .carry {
+            color: #222;
+        }
+
+        .brand-text .karo {
+            color: #28a745;
+            margin-left: 2px;
+        }
+
+        .logo-img {
+            width: 50px;
+            height: 50px;
+            margin: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover .logo-img {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu a:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        .nav-menu a:hover {
+            color: #28a745;
+            transform: translateY(-1px);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 2px solid;
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #28a745;
+            border-color: #28a745;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+        }
+
+        .btn-outline:hover {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-color: #28a745;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #218838, #1ea085);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.5);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        /* Scanner Container */
+        .scanner-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 20px 40px;
+        }
+
+        .scanner-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scanner-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #28a745, #20c997, #17a2b8, #20c997, #28a745);
+            background-size: 200% 100%;
+            animation: gradientMove 3s linear infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .header-section {
+            margin-bottom: 2rem;
+        }
+
+        .eco-icon {
+            font-size: 64px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .scanner-card h1 {
+            color: #28a745;
+            font-size: 2.5rem;
+            margin: 15px 0;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .scanner-wrapper {
+            margin: 30px auto;
+            border-radius: 20px;
+            overflow: hidden;
+            max-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        #reader {
+            border-radius: 20px;
+            background: #000;
+        }
+
+        .instructions {
+            margin-top: 30px;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .instructions p {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Popup */
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .popup-content {
+            background: white;
+            border-radius: 25px;
+            max-width: 500px;
+            width: 100%;
+            animation: slideUp 0.4s ease-out;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .popup-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 2.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .popup-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: floatVisual 6s ease-in-out infinite;
+        }
+
+        @keyframes floatVisual {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(15px, -15px) rotate(8deg); }
+        }
+
+        .popup-header > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .offer-icon {
+            font-size: 72px;
+            display: block;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        .popup-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .popup-body {
+            padding: 2rem;
+        }
+
+        .popup-body h3 {
+            color: #28a745;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .popup-body p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .cafe-info {
+            background: linear-gradient(135deg, #e8f5e8, #d4edda);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            border-left: 4px solid #28a745;
+        }
+
+        .cafe-info strong {
+            color: #28a745;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .cafe-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .popup-actions {
+            padding: 0 2rem 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .popup-actions .btn {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.8rem 1rem;
+            }
+
+            .nav-container {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .logo {
+                padding: 0.3rem 0.6rem;
+            }
+
+            .logo-img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .brand-text {
+                font-size: 1.1rem;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .nav-actions {
+                width: 100%;
+                justify-content: space-between;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+            }
+
+            .nav-actions .btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.85rem;
+                flex: 1;
+            }
+
+            .scanner-container {
+                padding: 140px 15px 30px;
+            }
+
+            .scanner-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .scanner-card h1 {
+                font-size: 1.8rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .eco-icon {
+                font-size: 48px;
+            }
+
+            .scanner-wrapper {
+                max-width: 100%;
+            }
+
+            .popup-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .popup-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .popup-body {
+                padding: 1.5rem;
+            }
+
+            .popup-body h3 {
+                font-size: 1.3rem;
+            }
+
+            .popup-actions {
+                flex-direction: column;
+                padding: 0 1.5rem 1.5rem;
+            }
+
+            .popup-actions .btn {
+                width: 100%;
+            }
+
+            .instructions p {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .scanner-card h1 {
+                font-size: 1.5rem;
+            }
+
+            .offer-icon {
+                font-size: 56px;
+            }
+        }
+
+        /* Touch-friendly */
+        @media (hover: none) and (pointer: coarse) {
+            .btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='logo/Mainlogo.png') }}" alt="CarryKaro Logo" class="logo-img">
+                <span class="brand-text">
+                    <span class="carry">Carry</span><span class="karo">Karo</span>
+                </span>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('offers') }}">Home</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                {% if current_user %}
+                    <a href="{{ url_for('scan') }}" class="btn btn-primary">Scan QR</a>
+                    <a href="{{ url_for('user_dashboard') }}" class="btn btn-primary">Dashboard</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary">Sign In</a>
+                    <a href="{{ url_for('signup') }}" class="btn btn-primary">Sign Up</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <!-- Scanner Section -->
+    <div class="scanner-container">
+        <div class="scanner-card">
+            <div class="header-section">
+                <div class="eco-icon">🌿</div>
+                <h1>Scan Your CarryKaro Bag</h1>
+                <p class="subtitle">Hold the QR code inside the frame to unlock exclusive eco-friendly offers</p>
+            </div>
+            
+            <div class="scanner-wrapper">
+                <div id="reader"></div>
+            </div>
+            
+            <div class="instructions">
+                <p>📸 Position the QR code within the frame</p>
+                <p>💚 Eco-friendly shopping rewards</p>
+                <p>🎁 Get instant offers from partner stores</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offer Popup -->
+    <div id="offerPopup" class="popup-overlay" style="display: none;">
+        <div class="popup-content">
+            <div class="popup-header">
+                <span class="offer-icon" id="offerIcon">🎉</span>
+                <h2>Congratulations!</h2>
+                <p>You've unlocked an exclusive offer</p>
+            </div>
+            
+            <div class="popup-body">
+                <h3 id="offerTitle"></h3>
+                <p id="offerDescription"></p>
+                
+                <div class="cafe-info">
+                    <strong>📍 Elyra Cafe, Mathura</strong>
+                    <p>Valid for 7 days from redemption</p>
+                </div>
+            </div>
+            
+            <div class="popup-actions">
+                <button onclick="acceptOffer()" class="btn btn-primary">Accept Offer</button>
+                <button onclick="closePopup()" class="btn btn-secondary">Maybe Later</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let offerData = null;
+        let html5QrcodeScanner = null;
+
+        function onScanSuccess(decodedText, decodedResult) {
+            console.log(`QR Code detected: ${decodedText}`);
+            html5QrcodeScanner.clear();
+            showRandomOffer(decodedText);
+        }
+
+        function showRandomOffer(qrText) {
+            const offers = [
+                {
+                    type: 'coffee',
+                    title: 'Buy 2 Get 1 Free - Coffee',
+                    description: 'Purchase any 2 coffees and get 1 coffee absolutely free!',
+                    icon: '☕',
+                    qr_text: qrText
+                },
+                {
+                    type: 'noodles',
+                    title: 'Buy 2 Get 1 Free - Noodles',
+                    description: 'Get a free noodles bowl when you buy 2 noodles!',
+                    icon: '🍜',
+                    qr_text: qrText
+                },
+                {
+                    type: 'chilli_potato',
+                    title: 'Buy 2 Get 1 Free - Chilli Potato',
+                    description: 'Enjoy 1 free chilli potato with purchase of 2!',
+                    icon: '🥔',
+                    qr_text: qrText
+                }
+            ];
+            
+            offerData = offers[Math.floor(Math.random() * offers.length)];
+            
+            document.getElementById('offerIcon').textContent = offerData.icon;
+            document.getElementById('offerTitle').textContent = offerData.title;
+            document.getElementById('offerDescription').textContent = offerData.description;
+            document.getElementById('offerPopup').style.display = 'flex';
+        }
+
+        function acceptOffer() {
+            {% if current_user %}
+                const qrCodeData = offerData ? offerData.qr_text : null;
+                
+                fetch("{{ url_for('generate_offer') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        qr_code: qrCodeData
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ Offer Generated Successfully!\n\n' + 
+                              data.offer.title + '\n\n' +
+                              'Redeem Code: ' + data.redeem_code + '\n' +
+                              'Expires: ' + data.expires_at);
+                        window.location.href = "{{ url_for('user_dashboard') }}";
+                    } else if (data.already_used) {
+                        alert('⚠️ Already Redeemed!\n\n' + data.message);
+                        closePopup();
+                    } else if (data.message) {
+                        alert(data.message);
+                        if (data.redirect) {
+                            window.location.href = data.redirect;
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Something went wrong. Please try again.');
+                });
+            {% else %}
+                window.location.href = "{{ url_for('login') }}";
+            {% endif %}
+        }
+
+        function closePopup() {
+            document.getElementById('offerPopup').style.display = 'none';
+            location.reload();
+        }
+
+        // ✅ Initialize QR Scanner with automatic back camera detection on mobile
+        async function initializeScanner() {
+            try {
+                // Check if device is mobile
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                let config = {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                };
+
+                // ✅ For mobile devices, prefer back camera
+                if (isMobile) {
+                    config.facingMode = "environment"; // Use back camera
+                }
+
+                html5QrcodeScanner = new Html5QrcodeScanner(
+                    "reader",
+                    config,
+                    false
+                );
+                
+                html5QrcodeScanner.render(onScanSuccess);
+            } catch (err) {
+                console.error("Error initializing scanner:", err);
+            }
+        }
+
+        // Initialize scanner when page loads
+        initializeScanner();
+
+        // Header scroll effect
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            const currentScrollY = window.scrollY;
+            
+            if (currentScrollY > 100) {
+                header.style.background = 'rgba(248, 249, 250, 0.98)';
+                header.style.backdropFilter = 'blur(25px)';
+            } else {
+                header.style.background = 'rgba(248, 249, 250, 0.95)';
+                header.style.backdropFilter = 'blur(20px)';
+            }
+
+            if (currentScrollY > lastScrollY && currentScrollY > 200) {
+                header.style.transform = 'translateY(-100%)';
+            } else {
+                header.style.transform = 'translateY(0)';
+            }
+            lastScrollY = currentScrollY;
+        });
+    </script>
+</body>
+</html>

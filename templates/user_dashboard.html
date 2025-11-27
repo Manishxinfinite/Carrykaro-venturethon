@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Offers - CarryKaro Dashboard</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo/browselogo1.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 50%, #c3e6cb 100%);
+            line-height: 1.6;
+            color: #333;
+            min-height: 100vh;
+            padding-bottom: 3rem;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(248, 249, 250, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .logo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo-img {
+            width: 50px;
+            height: 50px;
+            margin: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover .logo-img {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .brand-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .brand-text .carry {
+            color: #222;
+        }
+
+        .brand-text .karo {
+            color: #28a745;
+            margin-left: 2px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .user-welcome {
+            color: #333;
+            font-weight: 500;
+            margin-right: 1rem;
+        }
+
+        .user-welcome i {
+            color: #28a745;
+            margin-right: 0.3rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 2px solid;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #28a745;
+            border-color: #28a745;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+        }
+
+        .btn-outline:hover {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-color: #28a745;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-primary-custom:hover {
+            background: linear-gradient(135deg, #218838, #1ea085);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.5);
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 100px auto 0;
+            padding: 2rem;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            color: #28a745;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .stat-info p {
+            color: #666;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        /* Offer Cards */
+        .offers-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .offer-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #28a745;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .offer-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, transparent 0%, rgba(40, 167, 69, 0.05) 100%);
+            border-radius: 0 15px 0 100%;
+        }
+
+        .offer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .offer-card.redeemed {
+            opacity: 0.8;
+            border-left-color: #6c757d;
+        }
+
+        .offer-card.expired {
+            opacity: 0.7;
+            border-left-color: #dc3545;
+        }
+
+        .offer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+            gap: 0.5rem;
+        }
+
+        .offer-header h3 {
+            font-size: 1.1rem;
+            color: #333;
+            margin: 0;
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .offer-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-expired {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .offer-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e0e0e0;
+            gap: 0.5rem;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-row .label {
+            color: #666;
+            font-weight: 500;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .detail-row .value {
+            color: #333;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .code {
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #28a745;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px dashed #28a745;
+        }
+
+        .code:hover {
+            background: #28a745;
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .timer-value {
+            color: #28a745;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* Copy Toast */
+        .copy-toast {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+        }
+
+        .copy-toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.8rem 1rem;
+            }
+
+            .nav-container {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .logo {
+                padding: 0.3rem 0.6rem;
+            }
+
+            .logo-img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .brand-text {
+                font-size: 1.1rem;
+            }
+
+            .nav-actions {
+                width: 100%;
+                justify-content: space-between;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+            }
+
+            .user-welcome {
+                display: none;
+            }
+
+            .nav-actions .btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.85rem;
+                flex: 1;
+            }
+
+            .dashboard-container {
+                padding: 1rem;
+                margin-top: 140px;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+                padding: 1.5rem;
+            }
+
+            .dashboard-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .dashboard-header p {
+                font-size: 0.9rem;
+            }
+
+            .dashboard-header .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stat-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+
+            .stat-info h3 {
+                font-size: 1.5rem;
+            }
+
+            .stat-info p {
+                font-size: 0.9rem;
+            }
+
+            .offers-list {
+                grid-template-columns: 1fr;
+            }
+
+            .offer-card {
+                padding: 1.2rem;
+            }
+
+            .offer-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .offer-header h3 {
+                font-size: 1rem;
+            }
+
+            .offer-badge {
+                align-self: flex-start;
+            }
+
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.3rem;
+            }
+
+            .detail-row .label {
+                font-size: 0.8rem;
+            }
+
+            .detail-row .value {
+                font-size: 0.85rem;
+                text-align: left;
+            }
+
+            .code {
+                font-size: 0.85rem;
+                letter-spacing: 1px;
+                padding: 0.4rem 0.6rem;
+            }
+
+            .timer-value {
+                font-size: 0.85rem;
+            }
+
+            .empty-state {
+                padding: 2rem 1rem;
+            }
+
+            .empty-state i {
+                font-size: 3.5rem;
+            }
+
+            .empty-state h3 {
+                font-size: 1.3rem;
+            }
+
+            .empty-state p {
+                font-size: 1rem;
+            }
+
+            .copy-toast {
+                right: 10px;
+                left: 10px;
+                transform: translateY(100px);
+            }
+
+            .copy-toast.show {
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-container {
+                padding: 0.5rem;
+                margin-top: 150px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                flex-direction: row;
+                text-align: left;
+            }
+
+            .dashboard-header h1 {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Touch-friendly */
+        @media (hover: none) and (pointer: coarse) {
+            .btn,
+            .code {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='logo/Mainlogo.png') }}" alt="CarryKaro Logo" class="logo-img">
+                <span class="brand-text">
+                    <span class="carry">Carry</span><span class="karo">Karo</span>
+                </span>
+            </div>
+
+            <div class="nav-actions">
+                <span class="user-welcome">
+                    <i class="fas fa-user-circle"></i>
+                    Welcome, <strong>{{ user.username }}</strong>!
+                </span>
+                <a href="{{ url_for('index') }}" class="btn btn-outline">
+                    <i class="fas fa-home"></i>Home
+                </a>
+                <a href="{{ url_for('scan') }}" class="btn btn-primary-custom">
+                    <i class="fas fa-qrcode"></i>Scan QR
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline">
+                    <i class="fas fa-sign-out-alt"></i>Logout
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header fade-in-up">
+            <div>
+                <h1>
+                    <i class="fas fa-gift"></i>My Offers Dashboard
+                </h1>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">
+                    <i class="fas fa-leaf"></i>Eco-friendly rewards for sustainable shopping
+                </p>
+            </div>
+            <a href="{{ url_for('scan') }}" class="btn btn-outline" style="border-color: white; color: white;">
+                <i class="fas fa-qrcode"></i>Scan New QR Code
+            </a>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid fade-in-up">
+            <div class="stat-card">
+                <div class="stat-icon">🎟️</div>
+                <div class="stat-info">
+                    <h3>{{ offers|length }}</h3>
+                    <p>Total Offers</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3>{{ redeemed_count }}</h3>
+                    <p>Redeemed</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-info">
+                    <h3>{{ active_count }}</h3>
+                    <p>Active</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">❌</div>
+                <div class="stat-info">
+                    <h3>{{ expired_count }}</h3>
+                    <p>Expired</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offers List -->
+        <div class="offers-list">
+            {% for offer in offers %}
+            <div class="offer-card fade-in-up {% if offer.is_redeemed %}redeemed{% elif offer.expires_at < now %}expired{% endif %}">
+                <div class="offer-header">
+                    <h3>{{ offer.offer_title }}</h3>
+                    {% if offer.is_redeemed %}
+                        <span class="offer-badge badge-success">
+                            <i class="fas fa-check-circle"></i> Redeemed
+                        </span>
+                    {% elif offer.expires_at < now %}
+                        <span class="offer-badge badge-expired">
+                            <i class="fas fa-times-circle"></i> Expired
+                        </span>
+                    {% else %}
+                        <span class="offer-badge badge-warning">
+                            <i class="fas fa-clock"></i> Active
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <div class="offer-details">
+                    <div class="detail-row">
+                        <span class="label"><i class="fas fa-key"></i> Redeem Code:</span>
+                        <span class="code" onclick="copyCode('{{ offer.redeem_code }}')" title="Click to copy">
+                            {{ offer.redeem_code }}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label"><i class="fas fa-calendar-plus"></i> Scanned At:</span>
+                        <span class="value">{{ offer.scanned_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label"><i class="fas fa-calendar-times"></i> Expires:</span>
+                        <span class="value">{{ offer.expires_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label"><i class="fas fa-hourglass-half"></i> Time Left:</span>
+                        <span class="value timer-value" id="timer-{{ offer.id }}">loading...</span>
+                    </div>
+                    {% if offer.is_redeemed %}
+                    <div class="detail-row">
+                        <span class="label"><i class="fas fa-check"></i> Redeemed At:</span>
+                        <span class="value">{{ offer.redeemed_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if not offers %}
+            <div class="empty-state fade-in-up">
+                <i class="fas fa-qrcode"></i>
+                <h3>No Offers Yet</h3>
+                <p>Scan a QR code on your sustainable carry bag to unlock exclusive offers!</p>
+                <a href="{{ url_for('scan') }}" class="btn btn-primary-custom" style="font-size: 1.1rem; padding: 0.8rem 2rem;">
+                    <i class="fas fa-qrcode"></i>Scan QR Code Now
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Copy Success Toast -->
+    <div class="copy-toast" id="copyToast">
+        <i class="fas fa-check-circle"></i> Code copied to clipboard!
+    </div>
+
+    <script>
+        function copyCode(code) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(code).then(() => {
+                    showCopyToast();
+                }).catch(() => {
+                    fallbackCopy(code);
+                });
+            } else {
+                fallbackCopy(code);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopyToast();
+            } catch (err) {
+                alert('Failed to copy: ' + text);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showCopyToast() {
+            const toast = document.getElementById('copyToast');
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for offer in offers %}
+                (function() {
+                    var timerId = "timer-{{ offer.id }}";
+                    var expiry = new Date("{{ offer.expires_at.strftime('%Y-%m-%dT%H:%M:%S') }}Z");
+                    var timerElem = document.getElementById(timerId);
+                    var isRedeemed = {{ 'true' if offer.is_redeemed else 'false' }};
+
+                    function updateTimer() {
+                        if (isRedeemed) {
+                            timerElem.textContent = "Redeemed";
+                            timerElem.style.color = "#155724";
+                            return;
+                        }
+
+                        var diff = expiry - new Date();
+                        
+                        if (diff <= 0) {
+                            timerElem.textContent = "Expired";
+                            timerElem.style.color = "#dc3545";
+                            return;
+                        }
+                        
+                        var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                        var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                        var mins = Math.floor((diff / (1000 * 60)) % 60);
+                        var secs = Math.floor((diff / 1000) % 60);
+                        
+                        timerElem.textContent = days + "d " + hours + "h " + mins + "m " + secs + "s";
+                        timerElem.style.color = "#28a745";
+                    }
+
+                    updateTimer();
+                    setInterval(updateTimer, 1000);
+                })();
+            {% endfor %}
+        });
+    </script>
+</body>
+</html>
